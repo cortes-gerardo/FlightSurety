@@ -23,6 +23,7 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_WEATHER = 30;
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
+    address[] multiCalls = new address[](0);
 
     FlightSuretyData private data;
 
@@ -65,6 +66,12 @@ contract FlightSuretyApp {
         _;
     }
 
+    modifier requireRegisteredAirline()
+    {
+        require(isRegisteredAirline(msg.sender), "Caller is not registered");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -82,6 +89,7 @@ contract FlightSuretyApp {
         contractOwner = msg.sender;
 
         data = FlightSuretyData(dataContract);
+        data.registerAirline(msg.sender);
     }
 
     /********************************************************************************************/
@@ -96,6 +104,12 @@ contract FlightSuretyApp {
         return true;  // Modify to call data contract's status
     }
 
+
+    function isRegisteredAirline(address airlineAddress) returns (bool)
+    {
+        return data.isRegisteredAirline(airlineAddress);
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -106,13 +120,35 @@ contract FlightSuretyApp {
     *
     */   
     function registerAirline
-                            (   
+                            (
+                                address airline
                             )
                             external
-                            pure
+                            requireRegisteredAirline
                             returns(bool success, uint256 votes)
     {
-        return (success, 0);
+        // TODO test this is working
+        if (!data.isMultipartyConsensusActive()) {
+            data.registerAirline(airline);
+            return (success, 0);
+        }
+
+        bool isDuplicate = false;
+        for (uint c = 0; c < multiCalls.length; c++) {
+            if (multiCalls[c] == msg.sender) {
+                isDuplicate = true;
+                break;
+            }
+        }
+        require(!isDuplicate, "Caller has already called this function.");
+
+        multiCalls.push(msg.sender);
+        if (multiCalls.length >= data.getM()) {
+            data.registerAirline(airline);
+            multiCalls = new address[](0);
+        }
+
+        return (success, multiCalls.length);
     }
 
 
@@ -342,7 +378,10 @@ contract FlightSuretyApp {
 }   
 
 contract FlightSuretyData {
-    function registerAirline() external;
+    function registerAirline(address airline) external;
+    function isRegisteredAirline(address airlineAddress) external returns (bool);
+    function isMultipartyConsensusActive() external returns (bool);
+    function getM() external returns (uint8);
     function buy() external; // buy insurance
     function creditInsurees() external;
     function pay() external;

@@ -8,17 +8,17 @@ contract FlightSuretyData {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
+    uint8 private constant M = 4;
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
     struct Airline {
-        address airline;
         bool registered;
-        bool participate;
     }
 
-    mapping(address => Airline) airlines;
+    mapping (address => Airline) airlines;
+    uint8 private airlinesCount;
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -30,8 +30,8 @@ contract FlightSuretyData {
     */
     constructor
                                 (
-                                ) 
-                                public 
+                                )
+                                public
     {
         contractOwner = msg.sender;
     }
@@ -91,9 +91,30 @@ contract FlightSuretyData {
                                 bool mode
                             ) 
                             external
-                            requireContractOwner 
+                            requireContractOwner
     {
         operational = mode;
+    }
+
+    function isRegisteredAirline(address airline)
+                            external
+                            returns(bool)
+    {
+        return airlines[airline].registered;
+    }
+
+    function isMultipartyConsensusActive()
+                    external
+                    returns(bool)
+    {
+        return airlinesCount >= M;
+    }
+
+    function getM()
+                external
+                returns (uint8)
+    {
+        return airlinesCount / 2;
     }
 
     /********************************************************************************************/
@@ -106,11 +127,13 @@ contract FlightSuretyData {
     *
     */   
     function registerAirline
-                            (   
+                            (
+                                address airline
                             )
                             external
-                            pure
     {
+        airlines[airline].registered = true;
+        airlinesCount = airlinesCount + 1;
     }
 
 

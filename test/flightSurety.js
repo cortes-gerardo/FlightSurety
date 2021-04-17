@@ -89,6 +89,22 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result, false, "Airline should not be able to register another airline if it hasn't provided funding");
 
   });
- 
+
+  it('(multiparty) cannot register an Airline using registerAirline() if it is not 4 people', async () => {
+      // ARRANGE
+      let newAirline = accounts[2];
+
+      // ACT
+      try {
+          await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
+      }
+      catch(e) {
+
+      }
+      let result = await config.flightSuretyData.isAirline.call(newAirline);
+
+      // ASSERT
+      assert.equal(result, true, "Airline should not be able to register another airline if it hasn't provided funding");
+  });
 
 });
