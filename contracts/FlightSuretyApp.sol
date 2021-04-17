@@ -24,6 +24,8 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
+    FlightSuretyData private data;
+
     address private contractOwner;          // Account used to deploy contract
 
     struct Flight {
@@ -73,10 +75,13 @@ contract FlightSuretyApp {
     */
     constructor
                                 (
+                                    address dataContract
                                 ) 
                                 public 
     {
         contractOwner = msg.sender;
+
+        data = FlightSuretyData(dataContract);
     }
 
     /********************************************************************************************/
@@ -335,3 +340,12 @@ contract FlightSuretyApp {
 // endregion
 
 }   
+
+contract FlightSuretyData {
+    function registerAirline() external;
+    function buy() external; // buy insurance
+    function creditInsurees() external;
+    function pay() external;
+    function fund() external;
+    function getFlightKey() external;
+}
