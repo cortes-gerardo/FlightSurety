@@ -1,13 +1,13 @@
 
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
-
+console.log("Testing")
 contract('Flight Surety Tests', async (accounts) => {
 
   var config;
   before('setup contract', async () => {
     config = await Test.Config(accounts);
-    await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
+    // await config.flightSuretyData.authorizeCaller(config.flightSuretyApp.address);
   });
 
   /****************************************************************************************/
@@ -83,14 +83,14 @@ contract('Flight Surety Tests', async (accounts) => {
     catch(e) {
 
     }
-    let result = await config.flightSuretyData.isAirline.call(newAirline); 
+    let result = await config.flightSuretyData.isRegisteredAirline.call(newAirline);
 
     // ASSERT
     assert.equal(result, false, "Airline should not be able to register another airline if it hasn't provided funding");
 
   });
 
-  it('(multiparty) cannot register an Airline using registerAirline() if it is not 4 people', async () => {
+  it('(multiparty) register an Airline using registerAirline()', async () => {
       // ARRANGE
       let newAirline = accounts[2];
 
@@ -101,10 +101,10 @@ contract('Flight Surety Tests', async (accounts) => {
       catch(e) {
 
       }
-      let result = await config.flightSuretyData.isAirline.call(newAirline);
+      let result = await config.flightSuretyData.isRegisteredAirline.call(config.firstAirline);
 
       // ASSERT
-      assert.equal(result, true, "Airline should not be able to register another airline if it hasn't provided funding");
+      assert.equal(result, true, "Airline should be registered");
   });
 
 });

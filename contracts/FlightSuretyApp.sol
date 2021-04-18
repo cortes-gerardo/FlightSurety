@@ -105,7 +105,9 @@ contract FlightSuretyApp {
     }
 
 
-    function isRegisteredAirline(address airlineAddress) returns (bool)
+    function isRegisteredAirline(address airlineAddress)
+                            public
+                            returns (bool)
     {
         return data.isRegisteredAirline(airlineAddress);
     }
@@ -382,6 +384,7 @@ contract FlightSuretyData {
     function isRegisteredAirline(address airlineAddress) external returns (bool);
     function isMultipartyConsensusActive() external returns (bool);
     function getM() external returns (uint8);
+
     function buy() external; // buy insurance
     function creditInsurees() external;
     function pay() external;
