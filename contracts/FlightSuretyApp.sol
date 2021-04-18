@@ -129,7 +129,6 @@ contract FlightSuretyApp {
                             requireRegisteredAirline
                             returns(bool success, uint256 votes)
     {
-        // TODO test this is working
         if (!data.isMultipartyConsensusActive()) {
             data.registerAirline(airline);
             return (success, 0);
