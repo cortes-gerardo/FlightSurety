@@ -66,9 +66,15 @@ contract FlightSuretyApp {
         _;
     }
 
-    modifier requireRegisteredAirline()
+    modifier requireAirlineRegistered()
     {
-        require(isRegisteredAirline(msg.sender), "Caller is not registered");
+        require(data.isRegisteredAirline(msg.sender), "Caller is not registered");
+        _;
+    }
+
+    modifier requireAirlineFunded()
+    {
+        require(data.isAirlineFunded(msg.sender), "Caller is not funded");
         _;
     }
 
@@ -101,15 +107,7 @@ contract FlightSuretyApp {
                             pure 
                             returns(bool) 
     {
-        return true;  // Modify to call data contract's status
-    }
-
-
-    function isRegisteredAirline(address airlineAddress)
-                            public
-                            returns (bool)
-    {
-        return data.isRegisteredAirline(airlineAddress);
+        return true;  // TODO Modify to call data contract's status
     }
 
     /********************************************************************************************/
@@ -126,7 +124,8 @@ contract FlightSuretyApp {
                                 address airline
                             )
                             external
-                            requireRegisteredAirline
+                            requireAirlineRegistered
+                            requireAirlineFunded
                             returns(bool success, uint256 votes)
     {
         if (!data.isMultipartyConsensusActive()) {
@@ -380,7 +379,8 @@ contract FlightSuretyApp {
 
 contract FlightSuretyData {
     function registerAirline(address airline) external;
-    function isRegisteredAirline(address airlineAddress) external returns (bool);
+    function isRegisteredAirline(address airline) external returns (bool);
+    function isAirlineFunded(address airline) external returns (bool);
     function isMultipartyConsensusActive() external returns (bool);
     function getM() external returns (uint8);
 

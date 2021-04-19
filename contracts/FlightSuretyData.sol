@@ -13,9 +13,11 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
+    uint256 private funds = 0 ether;
+
     struct Airline {
         bool registered;
-        bool founded;
+        bool funded;
     }
 
     mapping (address => Airline) airlines;
@@ -64,6 +66,12 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireAirlineRegistered()
+    {
+        require(isRegisteredAirline(msg.sender), "Caller is not registered");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -98,10 +106,17 @@ contract FlightSuretyData {
     }
 
     function isRegisteredAirline(address airline)
-                            external
+                            public
                             returns(bool)
     {
         return airlines[airline].registered;
+    }
+
+    function isAirlineFunded(address airline)
+                            external
+                            returns(bool)
+    {
+        return airlines[airline].funded;
     }
 
     function isMultipartyConsensusActive()
@@ -185,7 +200,12 @@ contract FlightSuretyData {
                             )
                             public
                             payable
+                            requireAirlineRegistered
     {
+        require(msg.value >= 10, "You need to found 10 eth at least");
+
+        funds = funds + msg.value;
+        airlines[msg.sender].funded = true;
     }
 
     function getFlightKey
