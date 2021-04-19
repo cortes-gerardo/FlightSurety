@@ -53,7 +53,7 @@ contract FlightSuretyApp {
     modifier requireIsOperational() 
     {
          // Modify to call data contract's status
-        require(true, "Contract is currently not operational");  
+        require(isOperational(), "Contract is currently not operational");
         _;  // All modifiers require an "_" which indicates where the function body will be added
     }
 
@@ -104,10 +104,9 @@ contract FlightSuretyApp {
 
     function isOperational() 
                             public 
-                            pure 
-                            returns(bool) 
+                            returns(bool)
     {
-        return true;  // TODO Modify to call data contract's status
+        return data.isOperational();
     }
 
     /********************************************************************************************/
@@ -126,6 +125,7 @@ contract FlightSuretyApp {
                             external
                             requireAirlineRegistered
                             requireAirlineFunded
+                            requireIsOperational
                             returns(bool success, uint256 votes)
     {
         if (!data.isMultipartyConsensusActive()) {
@@ -378,6 +378,8 @@ contract FlightSuretyApp {
 }   
 
 contract FlightSuretyData {
+    function isOperational() external returns(bool);
+
     function registerAirline(address airline) external;
     function isRegisteredAirline(address airline) external returns (bool);
     function isAirlineFunded(address airline) external returns (bool);
