@@ -1,6 +1,7 @@
 
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
+const timestamp = Math.floor(Date.now() / 1000);
 console.log("Testing")
 contract('Flight Surety Tests', async (accounts) => {
 
@@ -193,6 +194,19 @@ contract('Flight Surety Tests', async (accounts) => {
       // ASSERT
       assert.equal(result5, true, "5th Airline should be registered");
 
+  });
+
+  it('(flights) register a flight', async () => {
+      // ARRANGE
+      // ACT
+      try {
+          await config.flightSuretyApp.registerFlight(config.firstAirline, 'GDO39', timestamp, {from: config.firstAirline});
+          await config.flightSuretyApp.fetchFlightStatus(config.firstAirline, 'GDO39', timestamp, {from: config.firstAirline});
+      }
+      catch (e) {
+
+      }
+      // ASSERT
   });
 
 });

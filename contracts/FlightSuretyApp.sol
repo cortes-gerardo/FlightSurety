@@ -30,14 +30,14 @@ contract FlightSuretyApp {
     address private contractOwner;          // Account used to deploy contract
 
     struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;        
         address airline;
+        string flight;
+        uint256 updatedTimestamp;
+        uint8 statusCode;
     }
+
     mapping(bytes32 => Flight) private flights;
 
- 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
@@ -158,11 +158,20 @@ contract FlightSuretyApp {
     */  
     function registerFlight
                                 (
+                                    address airline,
+                                    string flight,
+                                    uint256 timestamp
                                 )
                                 external
-                                pure
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
 
+        flights[flightKey] = Flight({
+            airline: airline,
+            flight: flight,
+            updatedTimestamp: timestamp,
+            statusCode: STATUS_CODE_UNKNOWN
+        });
     }
     
    /**
@@ -177,8 +186,9 @@ contract FlightSuretyApp {
                                     uint8 statusCode
                                 )
                                 internal
-                                pure
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        flights[flightKey].statusCode = statusCode;
     }
 
 
@@ -390,5 +400,5 @@ contract FlightSuretyData {
     function creditInsurees() external;
     function pay() external;
     function fund() external;
-    function getFlightKey() external;
+    //function getFlightKey(address airline, string flight, uint256 timestamp) external returns(bytes32);
 }
