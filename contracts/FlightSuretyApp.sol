@@ -163,6 +163,9 @@ contract FlightSuretyApp {
                                     uint256 timestamp
                                 )
                                 external
+                                requireAirlineRegistered
+                                requireAirlineFunded
+                                requireIsOperational
     {
         bytes32 flightKey = getFlightKey(airline, flight, timestamp);
 
