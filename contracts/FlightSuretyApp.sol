@@ -192,6 +192,10 @@ contract FlightSuretyApp {
     {
         bytes32 flightKey = getFlightKey(airline, flight, timestamp);
         flights[flightKey].statusCode = statusCode;
+
+        if(statusCode==STATUS_CODE_LATE_OTHER){
+             data.creditInsurees(flightKey);
+        }
     }
 
 
@@ -400,7 +404,7 @@ contract FlightSuretyData {
     function getM() external returns (uint8);
 
     function buy() external; // buy insurance
-    function creditInsurees() external;
+    function creditInsurees(bytes32 flightKey) external;
     function pay() external;
     function fund() external;
     //function getFlightKey(address airline, string flight, uint256 timestamp) external returns(bytes32);

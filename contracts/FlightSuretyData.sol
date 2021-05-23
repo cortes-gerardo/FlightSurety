@@ -22,6 +22,15 @@ contract FlightSuretyData {
 
     mapping (address => Airline) airlines;
     uint8 private airlinesCount;
+
+    struct Insurance {
+        address passengersAddress;
+        uint256 purchasedAmount;
+    }
+
+    mapping(bytes32 => Insurance[]) insurances;
+    mapping(address => uint256) payouts;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -158,11 +167,24 @@ contract FlightSuretyData {
     */
     function buy
                             (
+                                address airline,
+                                string flight,
+                                uint256 timestamp
                             )
                             external
                             payable
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
 
+        insurances[flightKey].push(
+            Insurance({
+                passengersAddress: msg.sender,
+                purchasedAmount: msg.value
+            })
+        );
+
+        // add to funds
+        funds = funds + msg.value;
     }
 
     /**
@@ -170,10 +192,19 @@ contract FlightSuretyData {
     */
     function creditInsurees
                                 (
+                                    bytes32 flightKey
                                 )
                                 external
-                                pure
     {
+        Insurance[] insurance = insurances[flightKey];
+        for (uint i=0; i<insurance.length; i++) {
+            uint256 purchasedAmount = insurance[i].purchasedAmount;
+            uint256 payoutAmount = purchasedAmount * 3 / 2;
+            require(funds >= payoutAmount, "There is not enough ETH to payout");
+            funds = funds - payoutAmount;
+            payouts[insurance[i].passengersAddress] = payoutAmount;
+        }
+
     }
 
 
@@ -185,8 +216,11 @@ contract FlightSuretyData {
                             (
                             )
                             external
-                            pure
     {
+        require(payouts[msg.sender] > 0);
+        uint256 prev = payouts[msg.sender];
+        payouts[msg.sender] = 0;
+        msg.sender.transfer(prev);
     }
 
    /**
